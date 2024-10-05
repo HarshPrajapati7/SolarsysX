@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <link href="https://fonts.cdnfonts.com/css/google-sans" rel="stylesheet">
+                
+        <link href="https://fonts.cdnfonts.com/css/dune-rise" rel="stylesheet">
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <title>SolarsysX</title>
+        <h1>SolarsysX</h1>
+
+        <!-- shaders -->
+        <script type="x-shader/x-vertex" id="vertexshader">
+			varying vec2 vUv;
+			void main() {
+				vUv = uv;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentshader">
+			uniform sampler2D baseTexture;
+			uniform sampler2D bloomTexture;
+			varying vec2 vUv;
+			void main() {
+				gl_FragColor = ( texture2D( baseTexture, vUv ) + vec4( 1.0 ) * texture2D( bloomTexture, vUv ) );
+			}
+		</script>
+
+        <script type="importmap">
+            {
+                "imports": {
+                    "three" : "./node_modules/three/build/three.module.js", 
+                    "three/examples/jsm/utils/BufferGeometryUtils.js" : "./node_modules/three/examples/jsm/utils/BufferGeometryUtils.js"
+                }
+            }
+        </script>
+    
+        <link rel="stylesheet" href="css/jquery-ui.min.css">
+        <link rel="stylesheet" href="css/jquery-ui.structure.min.css">
+        <link rel="stylesheet" href="css/jquery-ui.theme.min.css">
+        <link rel="stylesheet" href="css/orrery.css">
+
+        
+        <link rel="manifest" href="data/manifest.json">
+        <meta name="msapplication-TileColor" content="#ffffff">
+        <meta name="msapplication-TileImage" content="data/ms-icon-144x144.png">
+        <meta name="theme-color" content="#ffffff">
+
+        <script type="module" src="js/orrery/src/launch.js"></script>
+        
+    </head>
+    <body>
+        <button id="start-btn">Activate Nova</button>
+<button id="stop-btn">Stop Nova</button>
+
+<div id="output"></div>
+
+<nav>
+  <a href="#section1" id="link1">Go to Section 1</a>
+  <a href="#section2" id="link2">Go to Section 2</a>
+</nav>
+
+<section id="section1">This is Section 1</section>
+<section id="section2">This is Section 2</section>
+
+        
+        <div class="logo">
+            <img src="data\android-icon-36x36.png" alt="">
+        </div>
+        <div id="inputBox">
+            <h3 id="date"></h3>
+            <div>
+                <table>
+                    <tr>
+                        <td>
+                            <button id="now" title="Set time to now"><img src="data/now.svg"></button>
+                        </td>
+                        <td>
+                            <button id="reverse" title="Slow/reverse time"><img src="data/rewind.svg"></button>
+                        </td>
+                        <td id="speedfield">
+                            <span id="speed"></span><br>
+                            FPS:&nbsp;<span id="fps"></span>
+                        </td>
+                        <td>
+                            <button id="forward" title="Advance time"><img src="data/ff.svg"></button>
+                        </td>
+                        <td>
+                            <button id="play" title="Play/pause"><img id="playpause" src="data/pause.svg"></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5" id="latlong">
+                            Geolocation:&nbsp;<span id="lat">Default (India)</span>&nbsp;<span id="long"></span>
+                        </td>
+                    </tr>
+                    <tr class="extraData">
+                        <td colspan="5">
+                            MJD:&nbsp;<span id="mjd"></span>&nbsp;&nbsp;&bull;&nbsp;&nbsp;LST:&nbsp;<span id="lst"></span>&deg;
+                        </td>
+                    </tr>
+                </table>
+                <label for="autocomplete"><b>Search a Celesitial Body</b></label>
+                <input id="autocomplete" title="Type an object's name">
+                <fieldset>
+                    <legend>Include:&nbsp;&nbsp;</legend>
+                    <input type="checkbox" name="moonBox" id="moonBox" title="Allow moons in search" checked>
+                    <label for="moonBox">Moons</label>&nbsp;&nbsp;
+                    <input type="checkbox" name="asteroidBox" id="asteroidBox" title="Allow asteroids in search" checked>
+                    <label for="asteroidBox">Asteroids</label>&nbsp;&nbsp;
+                    <input type="checkbox" name="cometBox" id="cometBox" title="Allow comets in search" checked>
+                    <label for="cometBox">Comets</label>
+                </fieldset>
+                <div id="info">
+                    <a id="infohead" href="" target="_blank"></a><br>
+                    <a href="" target="_blank"><img src="" class="wikipic"></a><br>
+                    <b><span id="planetInfo" class="data"></span></b><br>
+                    Semimajor Axis:&nbsp;<span id="semiMajorAxis" class="data"></span><br>
+                    Orbital Period:&nbsp;<span id="period" class="data"></span><br>
+                    Eccentricity:&nbsp;<span id="eccentricity" class="data"></span><br>
+                    Inclination:&nbsp;<span id="inclination" class="data"></span>&deg;<br>
+                    Orbital Velocity: <span id="orbitVel" class="data"></span>&nbsp;km/s<br>
+                    Radius:&nbsp;<span id="radius" class="data"></span>&nbsp;km<br>
+                    Absolute Magnitude:&nbsp;<span id="absMag" class="data"></span>
+                    <span id="earthRel">
+                        <br>Apparent Magnitude:&nbsp;<span id="appMag" class="data"></span><br>
+                        Distance from Sun:&nbsp;<span id="toSun" class="data"></span>&nbsp;AU<br>
+                        Distance from Earth:&nbsp;<span id="toEarth" class="data"></span>&nbsp;AU<br>
+                        Right Ascension:&nbsp;<span id="RA" class="data"></span>&rdquo;<br>
+                        Declination:&nbsp;<span id="dec" class="data"></span>&deg;<br>
+                        <span id="riseSet" class="data"></span>
+                        Altitude:&nbsp;<span id="alt" class="data"></span>&deg;<br>
+                        Azimuth:&nbsp;<span id="az" class="data"></span>&rdquo;<br>
+                        <span class="extraData">Hour Angle:&nbsp;<span id="ha" class="data"></span>&rdquo;<br></span>
+                        Elongation:&nbsp;<span id="elong" class="data"></span>&deg;
+                    </span>
+                    <span id="earth">
+                        <br>Distance from Sun:&nbsp;<span id="earthToSun" class="data"></span>&nbsp;AU<br>
+                        Sun Right Ascension:&nbsp;<span id="sunRA" class="data"></span>&rdquo;<br>
+                        Sun Declination:&nbsp;<span id="sunDec" class="data"></span>&deg;<br>
+                        Sun&nbsp;<span id="earthRiseSet" class="data"></span>
+                        Sun Altitude:&nbsp;<span id="sunAlt" class="data"></span>&deg;<br>
+                        Sun Azimuth:&nbsp;<span id="sunAz" class="data"></span>&rdquo;<br>
+                    </span>
+                </div>
+            </div>  
+            <h3>Set Time and Geolocation</h3>
+            <div>
+                <table>
+                    <tr>
+                        <td>
+                            <label for="manualYear">Year:</label>
+                            <input id="manualYear" title="Year (&plusmn;9999)">
+                        </td>
+                        <td>
+                            <label for="manualDay">MMDD:</label>
+                            <input id="manualDay" title="Month and Day (MMDD)">
+                        </td>
+                        <td>
+                            <label for="manualTime">Time:</label>
+                            <input id="manualTime" title="Time of Day (HHMM in military time)">
+                        </td>
+                        <td style="vertical-align: bottom;">
+                            <button id="setTime" title="Set time"><img src="data/set.svg"></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            Valid date range: 9999 BC to 9999 AD<br>Use negative year values for BC<br>Time in 4-digit military time
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="manualLat">Lat:</label>
+                            <input id="manualLat" title="Latitude (decimal degrees)">
+                        </td>
+                        <td>
+                            <label for="manualLon">Lon:</label>
+                            <input id="manualLon" title="Longitude (decimal degrees)">
+                        </td>
+                        <td colspan="2" style="vertical-align: bottom;">
+                            <button id="setCoords" title="Set coordinates"><img src="data/set.svg"></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            Use decimal degrees for lat/long,<br>negative values for west or south
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <h3>Help</h3>
+            <div>
+                <p><b>SPACE BAR:</b> Pause/resume time<br>
+                <b>LEFT/RIGHT ARROW KEYS:</b> Change speed<br>
+                <b>DOWN ARROW KEY:</b> Set to current time<br>
+                <b>UP ARROW KEY:</b> Toggle chase mode on focused object<br>
+                <b>ESC:</b> Release focus on object<br>
+                <b>F2:</b> Hide/show UI panels<br>
+                <b>F4:</b> Hide/show celestial sphere<br>
+                <b>F8:</b> Hide/show extra time info</p>
+                <p><b>CLICK ON LABELS:</b> Shift focus to object and display info<br>
+                <b>CLICK ON INFO HEADER OR IMAGE:</b> Learn more on Wikipedia<br>
+                <b>LEFT/MID/RIGHT MOUSE + DRAG:</b> Rotate/zoom/translate around focus<br>
+                <b>SCROLL WHEEL:</b> Zoom to focus</p>
+                <p><b>HTTP VARIABLES - SET ON LAUNCH:</b><br>
+                <b>x: (decimal degrees)</b> Longitude<br>
+                <b>y: (decimal degrees)</b> Latitude<br>
+                <b>t: (YYYYMMDDHHMM)</b> Date<br>
+                <b>n: (integer)</b> Small asteroid limit (max: <span id="smallRoids"></span>)</p>
+                <button id="openSplash">About</button>
+            </div>
+            <!--
+            <h3>Display Options</h3>
+            <div>
+                Orbit Opacity:<div id="slider"></div>
+            </div>
+            -->
+        </div>
+
+        
+    </body>
+</html>
